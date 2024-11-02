@@ -1,0 +1,19 @@
+{
+    "name": "dbt",
+    "dockerComposeFile": "../../dbt_202410/docker-compose.yml",
+    "service": "dbt",
+    "workspaceFolder": "/app",
+    "overrideCommand": true,
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "innoverio.vscode-dbt-power-user"
+            ],
+            "settings": {
+                "dbt.enableNewLineagePanel": true,
+                "dbt.prefixGenerateModel": "stg",
+                "dbt.fileNameTemplateGenerateModel": "{prefix}_{sourceName}_{tableName}"
+            }
+        }
+    }
+}

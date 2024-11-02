@@ -1,0 +1,19 @@
+version: 2
+# This source file is under development.
+sources:
+  - name: rds_snapshot
+    tables:
+      - name: sample_table
+        description: >
+            This source table is actually a set of files in external storage.
+            The dbt-external-tables package provides handy macros for getting
+            those files queryable, just in time for modeling.
+                            
+        external:
+          location: "@example_stage/data.sample_table"
+          file_format: "parquet_format" 
+          infer_schema: true
+          auto_refresh: false
+        
+        #columns:
+          # if infer_schema is false, need to provide

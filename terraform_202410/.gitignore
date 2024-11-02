@@ -1,0 +1,11 @@
+.env
+.terraform
+
+.terragrunt-cache
+.terraform_backend
+
+backend.tf
+provider.tf
+
+# please include this lock file if you use this template
+.terraform.lock.hcl

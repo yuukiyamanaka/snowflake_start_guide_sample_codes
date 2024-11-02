@@ -1,0 +1,34 @@
+# Check here for details
+# https://docs.getdbt.com/docs/core/connect-data-platform/snowflake-setup
+default:
+  outputs:
+    default: &default
+      type: snowflake
+      # threads=1 is too slow, please fix it if needed
+      threads: 1
+      account: '{{ env_var(''SNOWFLAKE_ACCOUNT'') }}'
+      user: '{{ env_var(''SNOWFLAKE_USER'') }}'
+      role: '{{ env_var(''SNOWFLAKE_ROLE'') }}'
+      warehouse: '{{ env_var(''SNOWFLAKE_WAREHOUSE'') }}' 
+      database: '{{ env_var(''SNOWFLAKE_DATABASE'') }}'
+      schema: '{{ env_var(''SNOWFLAKE_SCHEMA'') }}'
+      query_tage: [dbt]
+      connect_retries: 0
+      connect_timeout: 10
+      retry_on_database_errors: false
+      retry_all: false
+      reuse_connections: false
+      client_session_keep_alive: false
+    local:
+      <<: *default
+      # password authentication is not recommended.
+      password: '{{ env_var(''SNOWFLAKE_PASSWORD'') }}'
+      # If you use SSO as login, use externalbrowser
+      # authenticator: externalbrowser
+    production:
+      # This profile is for deploy system
+      <<: *default
+      authenticator: keypair
+      private_key: '{{ env_var(''SNOWFLAKE_PRIVATE_KEY'') }}'
+      private_key_passphrase: '{{ env_var(''SNOWFLAKE_PRIVATE_KEY_PASSPHRASE'') }}'
+  target: local

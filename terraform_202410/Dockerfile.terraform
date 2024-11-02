@@ -1,0 +1,7 @@
+ARG PYTHON_VERSION
+FROM hashicorp/terraform:1.9.5
+
+WORKDIR /app
+
+# 日本時間に変更する
+ENV TZ=Asia/Tokyo

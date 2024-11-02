@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  terraform:
+    build:
+      context: .
+      dockerfile: Dockerfile.terragrunt
+    env_file:
+      - .env
+    volumes:
+      - .:/app:delegated
+    command: /bin/sh -c "while sleep 1000; do :; done"
+
+volumes:
+  app:
