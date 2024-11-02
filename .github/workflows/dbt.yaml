@@ -1,0 +1,69 @@
+name: dbt Run Workflow
+run-name: dbt Deploy to ${{ github.event.inputs.env }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        type: choice
+        description: "deploy target:"
+        options:
+          - production
+          - development
+
+env:
+  dbt_profiles_dir: ./.dbt
+  snowflake_account: 
+  snowflake_user:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check whether main branch is if production specified
+        if: ${{ github.event.inputs.target == 'production' && github.ref != 'refs/heads/main' }}
+        run: |
+          echo "Production deployment is only allowed from main branch."
+          exit 1
+
+  dbt_run:
+    name: dbt-run
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: dbt_202410
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11.9
+
+      - name: Install Package
+        run: |
+          python -m pip install --upgrade pip
+          chmod +x ./install-poetry.sh
+          ./bin/install_poetry.sh
+          poetry install
+
+      - name: Deploy demo_project
+        working-directory: dbt/demo_project
+        run: |
+          dbt deps --target ${{ inputs.target }}
+          dbt seed --full-refresh --target ${{ inputs.target }} --exclude package:dbt_project_evaluator
+          dbt run-operation stage_external_sources --vars "ext_full_refresh: true" --target ${{ inputs.target }}
+          dbt run --target ${{ inputs.target }} --exclude package:dbt_project_evaluator
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ env.snowflake_account }}
+          SNOWFLAKE_USER: ${{ env.snowflake_user }}
+          SNOWFLAKE_AUTHENTICATOR: keypair
+          SNOWFLAKE_PRIVATE_KEY: ${{ secrets.SNOWFLAKE_PRIVATE_KEY }}
+          SNOWFLAKE_PRIVATE_KEY_PASSPHRASE: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_PASSPHRASE }}
+          DBT_PROFILES_DIR: ${{ env.dbt_profiles_dir }}
